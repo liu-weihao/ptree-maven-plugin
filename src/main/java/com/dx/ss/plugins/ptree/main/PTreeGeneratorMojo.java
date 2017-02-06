@@ -33,8 +33,6 @@ public class PTreeGeneratorMojo extends AbstractMojo {
 
     /**
      * Location of the configuration file.
-     * If the xml file name end with -mybatis3.xml, it means to use mybatis3 to generate codes;
-     * otherwise, it will use JPA to generate codes which name end with -jpa.xml
      */
     @Parameter(property="ptree.generator.configurationFile", defaultValue="${project.basedir}/src/main/resources/ptree-mybatis3.xml", required=true)
     private File configurationFile;
@@ -49,7 +47,7 @@ public class PTreeGeneratorMojo extends AbstractMojo {
 			log.info(configuration.toString());
 			
 			Mybatis3Generator generator = new Mybatis3Generator(configuration);
-			generator.generate();
+			generator.generate();//generate and write files
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
