@@ -1,17 +1,29 @@
 package com.dx.ss.plugins.ptree.main;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import com.dx.ss.plugins.ptree.config.BaseConfiguration;
+import com.dx.ss.plugins.ptree.config.xml.ConfigurationParser;
+import com.dx.ss.plugins.ptree.generate.Mybatis3Generator;
+
+/**
+ * Generator Mojo. Only configuration file will be supported.
+ * @author Frank
+ */
 @Mojo(name = "gen", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class PTreeGeneratorMojo extends AbstractMojo {
+	
+	private Log log = getLog();
 	
 	/**
      * Maven Project.
@@ -21,13 +33,27 @@ public class PTreeGeneratorMojo extends AbstractMojo {
 
     /**
      * Location of the configuration file.
+     * If the xml file name end with -mybatis3.xml, it means to use mybatis3 to generate codes;
+     * otherwise, it will use JPA to generate codes which name end with -jpa.xml
      */
-    @Parameter(property="ptree.generator.configurationFile", defaultValue="${project.basedir}/src/main/resources/ptreeConfig.xml", required=true)
+    @Parameter(property="ptree.generator.configurationFile", defaultValue="${project.basedir}/src/main/resources/ptree-mybatis3.xml", required=true)
     private File configurationFile;
     
     
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		getLog().info("ptree code generating...");
+		log.info("ptree code generating...");
+		ConfigurationParser parser = new ConfigurationParser();
+		try {
+			//Parse xml configuration file.
+			BaseConfiguration configuration = parser.parseConfiguration(configurationFile);
+			log.info(configuration.toString());
+			
+			Mybatis3Generator generator = new Mybatis3Generator(configuration);
+			generator.generate();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
