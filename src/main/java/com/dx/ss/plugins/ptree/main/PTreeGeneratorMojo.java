@@ -30,7 +30,13 @@ public class PTreeGeneratorMojo extends AbstractMojo {
      */
     @Parameter(property="project", required=true, readonly=true)
     private MavenProject project;
-
+    
+    /**
+     * Output Directory.
+     */
+    @Parameter(property="mybatis.generator.outputDirectory", defaultValue="${project.build.directory}/generated-sources/ptree-generator", required=true)
+    private File outputDirectory;
+    
     /**
      * Location of the configuration file.
      */
@@ -46,12 +52,17 @@ public class PTreeGeneratorMojo extends AbstractMojo {
 			BaseConfiguration configuration = parser.parseConfiguration(configurationFile);
 			log.info(configuration.toString());
 			
-			Mybatis3Generator generator = new Mybatis3Generator(configuration);
+			MavenShellCallback mavenShellCallback = new MavenShellCallback(this);
+			Mybatis3Generator generator = new Mybatis3Generator(mavenShellCallback, configuration);
 			generator.generate();//generate and write files
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		log.info("generate completely! ");
+	}
+
+	public File getOutputDirectory() {
+		return outputDirectory;
 	}
 
 }
